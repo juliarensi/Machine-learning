@@ -54,3 +54,4 @@ gtTotal <- gtAlta + gtBaixa
 
 estAcc <- (gtBaixa*pdBaixa/gtTotal^2)+(gtAlta*pdAlta/gtTotal^2)
 estAcc
+
