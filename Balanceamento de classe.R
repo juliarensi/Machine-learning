@@ -20,5 +20,5 @@ table(treinoCovid23_down)
 
 # up
 treinoCovid23_up <- upSample(x = treinoCovid23[, -ncol(treinoCovid23)], y = treinoCovid23$sexo)
-table(treinoCovid23_up$sexo)  
+table(treinoCovid23_up$sexo)   
  
