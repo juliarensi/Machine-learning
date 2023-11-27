@@ -1,0 +1,54 @@
+
+---
+title: "DataTable (DT) IDEPE"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    horizontal_layout: fill
+    theme: yeti
+---
+
+```{r setup, include=FALSE}
+pacman::p_load(
+  ## ETL
+  data.table, dplyr,
+  ## WIDGETS
+  DT
+  )
+
+idepe_enem <- fread('https://raw.githubusercontent.com/hugoavmedeiros/ciencia_politica_com_r/master/bases_tratadas/idepe_enem_scolas_2019.csv')
+```
+
+IDEPE
+================================
+# Índice de Desenvolvimento da Educação de Pernambuco IDEPE começou a ser medido em 2008 e é consolidado com base no desempenho do Sistema de Avaliação da Educação Básica de Pernambuco (SAEPE) e na Taxa de Aprovação. O desempenho corresponde à média da performance dos alunos em Língua Portuguesa e Matemática, resultante dos testes elaborados no SAEPE.
+
+```{r}
+
+idepe_enem %>% select(tp_escola, tp_localizacao, enem, idepe, nota_saep) %>% datatable(
+  # Título
+  caption = htmltools::tags$caption(
+    # estilo do título usando css
+    style = 'text-align: center; font-size: 18px; font-weight: bold;',
+    'Tabela 1: Base de Dados IDEPE'),
+  # nomes das colunas
+  colnames = c('tipo escola', 'localização', 'nota enem', 'nota idepe', 'nota saep'),
+  filter = "top",
+  # extensões para serem acrescentadas
+  extensions = c('Buttons', 'ColReorder', 'Responsive'),
+  # as opções configuram efetivamente as extensões
+  options = list(
+    #
+    dom = 'Blfrtip',
+    # primeiro vamos configurar os botões, adicionando funcionalidades
+    buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+    # permite ao usuário reordenar as colunas
+    colReorder = TRUE,
+    # controla quantas linhas serão mostradas por página
+    pageLength = 25, 
+    # ativa o spinner (indicador de processamento)
+    processing = TRUE
+  )
+) 
+
+```
