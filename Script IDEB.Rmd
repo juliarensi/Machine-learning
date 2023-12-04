@@ -1,0 +1,108 @@
+
+---
+title: "Trabalho Hugo"
+author: "Eric, Júlia, Baruque"
+html:
+    embed-resources: true
+execute:
+  echo: FALSE
+  warning: FALSE
+  message: FALSE
+  embed-resources: TRUE
+---
+
+::: panel-tabset
+```{r}
+# get data
+
+pacman::p_load(crosstalk, dplyr, DT, plotly, data.table, ade4, arules, car,
+    caret, corrplot, e1071, forcats, ggplot2, mlbench, mltools,
+    randomForest, rattle, tidyverse, readxl, party, leaflet)
+
+
+
+# baixando base
+BFundeb <- read_excel("BFundeb.xlsx")
+#filtrando base apenas para o nordeste
+BFundeb_nordest<- filter(BFundeb, Regiao=="Nordeste")
+BFundeb_nordest2<- BFundeb %>% 
+  filter(Regiao=="Nordeste") %>% 
+  select(IDEB,PROFISSIONAIS,DESPESNFUND,NAPLICADO,DESPEDUCTODAS,
+                            DESPESSOAL,INVESEDUCENSFUND,NUM_ANO,INVESALUN, Estadual) %>% 
+mutate(
+  IDEB = replace_na(IDEB, mean(IDEB, na.rm = TRUE))
+)
+# Preencha os valores ausentes com a média
+
+
+```
+
+## Apresentação
+
+O Índice de Desenvolvimento da Educação Básica (IDEB) é uma ferramenta fundamental para avaliar a qualidade da educação no Brasil. Criado em 2007, é calculado a cada dois anos pelo Instituto Nacional de Estudos e Pesquisas Educacionais Anísio Teixeira (INEP). O IDEB combina dois aspectos cruciais da educação: o fluxo escolar e as médias de desempenho nas avaliações.
+
+O fluxo escolar é medido pela taxa de aprovação dos estudantes, considerando a progressão regular sem reprovações ou desistências. Já as médias de desempenho são obtidas a partir dos resultados de exames como a Prova Brasil (para os anos iniciais e finais do ensino fundamental) e o Exame Nacional do Ensino Médio (ENEM), para o ensino médio. O IDEB é calculado para escolas, municípios, estados e para o país como um todo.
+
+A utilização do IDEB na tomada de decisão baseada em evidências é extremamente valiosa. Gestores educacionais podem empregar os dados do índice para identificar pontos críticos no sistema educacional e implementar políticas específicas de melhoria. Por exemplo, se uma escola apresenta baixo IDEB devido à alta taxa de reprovação, podem ser desenvolvidas estratégias de apoio pedagógico para os alunos com dificuldades de aprendizado.
+
+Além disso, o IDEB serve como um instrumento de accountability, permitindo que a sociedade acompanhe e cobre resultados das políticas públicas em educação. A transparência e a facilidade de compreensão dos dados do IDEB fomentam um debate qualificado sobre a educação, envolvendo não apenas profissionais da área, mas também pais, estudantes e a comunidade em geral.
+
+Portanto, o IDEB é mais do que um simples número; ele é um diagnóstico compreensivo da educação que subsidia a tomada de decisões informadas, visando a melhoria contínua do ensino no Brasil. Ao monitorar e analisar os resultados do IDEB ao longo do tempo, é possível identificar tendências, progressos e desafios, orientando a formulação de políticas educacionais mais efetivas e alinhadas às necessidades reais dos estudantes brasileiros.
+
+## Estatísticas Descritivas
+
+```{r}
+dados_shared_data <- SharedData$new(BFundeb_nordest)
+bscols( 
+  list(
+    
+    list(
+      filter_select("data", "Selecione o Ano:", dados_shared_data,
+                    ~NUM_ANO, multiple = TRUE),
+      filter_select("muni", "Selecione o Municipio: ",
+                    dados_shared_data,
+                    ~Município.x, multiple = TRUE),
+      filter_select("muni", "Selecione o Faixa de População: ",
+                    dados_shared_data,
+                    ~Faixa_pop, multiple = TRUE)),
+    
+    #adicionando um gráfico de boxplot do ideb
+    list(
+      plot_ly(dados_shared_data, x = ~factor(NUM_ANO), y = ~IDEB, type = "box")%>%
+        layout(title = "Ideb por Ano",
+               xaxis = list(title = "Ano"),
+               yaxis = list(title = "IDEB")),
+      plot_ly(dados_shared_data, x = ~factor(NUM_ANO), y = ~INVESALUN, type = "box")%>%
+        layout(title = "Investimento Aluno por Ano",
+               xaxis = list(title = "Ano"),
+               yaxis = list(title = "Investimento Aluno")),
+      plot_ly(dados_shared_data, x = ~factor(NUM_ANO), y = ~DESPESSOAL, type = "box")%>%
+        layout(title = "Despesa com Pessoal por Ano",
+               xaxis = list(title = "Ano"),
+               yaxis = list(title = "Despesa com Pessoal")),
+      plot_ly(dados_shared_data, x = ~factor(NUM_ANO), y = ~DESPEDUCTODAS, type = "box")%>%
+        layout(title = "Despesa por Ano",
+               xaxis = list(title = "Ano"),
+               yaxis = list(title = "Despesa")) 
+    )
+  )
+  
+
+)
+```
+
+## Modelos
+```{r}
+IDEB2<- read_rds("IDEB2.rds")
+plot(IDEB2)
+```
+
+```{r}
+fancyRpartPlot(IDEB2$finalModel)
+```
+
+```{r}
+plot(varImp(IDEB2)) 
+```
+
+:::
